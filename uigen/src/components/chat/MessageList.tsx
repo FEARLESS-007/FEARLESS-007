@@ -5,6 +5,31 @@ import { cn } from "@/lib/utils";
 import { User, Bot, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
+function getToolLabel(toolName: string, args: Record<string, unknown>): string {
+  const fileName = typeof args.path === "string" ? args.path.split("/").pop() : undefined;
+
+  if (toolName === "str_replace_editor") {
+    switch (args.command) {
+      case "create": return fileName ? `Creating ${fileName}` : "Creating file";
+      case "str_replace": return fileName ? `Editing ${fileName}` : "Editing file";
+      case "insert": return fileName ? `Inserting into ${fileName}` : "Inserting into file";
+      case "view": return fileName ? `Reading ${fileName}` : "Reading file";
+    }
+  }
+
+  if (toolName === "file_manager") {
+    switch (args.command) {
+      case "rename": {
+        const newFile = typeof args.new_path === "string" ? args.new_path.split("/").pop() : undefined;
+        return fileName && newFile ? `Renaming ${fileName} → ${newFile}` : "Renaming file";
+      }
+      case "delete": return fileName ? `Deleting ${fileName}` : "Deleting file";
+    }
+  }
+
+  return toolName;
+}
+
 interface MessageListProps {
   messages: Message[];
   isLoading?: boolean;
@@ -81,12 +106,12 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                                 {tool.state === "result" && tool.result ? (
                                   <>
                                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    <span className="text-neutral-700">{tool.toolName}</span>
+                                    <span className="text-neutral-700">{getToolLabel(tool.toolName, tool.args as Record<string, unknown>)}</span>
                                   </>
                                 ) : (
                                   <>
                                     <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
-                                    <span className="text-neutral-700">{tool.toolName}</span>
+                                    <span className="text-neutral-700">{getToolLabel(tool.toolName, tool.args as Record<string, unknown>)}</span>
                                   </>
                                 )}
                               </div>
