@@ -79,3 +79,7 @@ When `ANTHROPIC_API_KEY` is not set, `getLanguageModel()` returns `MockLanguageM
 ### Testing
 
 Vitest + jsdom + React Testing Library. Tests live in `__tests__` folders co-located with source. The vitest config uses `vite-tsconfig-paths` so `@/` path aliases work in tests.
+
+## Code Style
+
+Add comments sparingly — only for logic that is genuinely non-obvious. Self-explanatory code should not be commented.
