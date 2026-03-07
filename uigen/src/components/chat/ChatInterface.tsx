@@ -27,11 +27,11 @@ export function ChatInterface() {
     <div className="flex flex-col h-full p-4 overflow-hidden">
       {messages.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
-          <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-50 mb-4 shadow-sm">
-            <Bot className="h-7 w-7 text-red-500" />
+          <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 mb-4 shadow-sm">
+            <Bot className="h-7 w-7 text-blue-600" />
           </div>
-          <p className="text-red-600 font-semibold text-lg mb-2">Start a conversation to generate React components</p>
-          <p className="text-red-400 text-sm max-w-sm">I can help you create buttons, forms, cards, and more</p>
+          <p className="text-neutral-900 font-semibold text-lg mb-2">Start a conversation to generate React components</p>
+          <p className="text-neutral-500 text-sm max-w-sm">I can help you create buttons, forms, cards, and more</p>
         </div>
       ) : (
         <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-hidden">
