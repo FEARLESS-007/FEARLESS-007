@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIGen2 — AI React Component Generator</title>
+  <meta name="description" content="Generate beautiful React components instantly using Google Gemini AI. Live preview, virtual file system, and real-time code generation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080c14;
+      --surface: #0d1420;
+      --border: #1e2a3a;
+      --text: #e8edf5;
+      --muted: #6b7a94;
+      --accent: #4f8ef7;
+      --accent2: #7c3aed;
+      --gemini: #1a73e8;
+      --green: #10b981;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--accent); color: #fff !important;
+      padding: 0.45rem 1.1rem; border-radius: 8px;
+      font-weight: 600; font-size: 0.85rem !important;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 6rem 1.5rem 4rem;
+      position: relative;
+    }
+    .hero-glow {
+      position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse at center, rgba(79,142,247,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.3);
+      color: var(--accent); padding: 0.35rem 1rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600; margin-bottom: 1.5rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    h1 {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 1.25rem;
+    }
+    h1 .gradient {
+      background: linear-gradient(135deg, #4f8ef7 0%, #7c3aed 50%, #06b6d4 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted); max-width: 560px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      background: linear-gradient(135deg, #4f8ef7, #7c3aed);
+      color: #fff; text-decoration: none;
+      padding: 0.8rem 2rem; border-radius: 10px;
+      font-weight: 700; font-size: 0.95rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(79,142,247,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,142,247,0.4); }
+    .btn-secondary {
+      background: var(--surface); color: var(--text); text-decoration: none;
+      padding: 0.8rem 2rem; border-radius: 10px;
+      font-weight: 600; font-size: 0.95rem;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); background: rgba(79,142,247,0.05); }
+
+    /* DEMO WINDOW */
+    .demo-wrap {
+      width: 100%; max-width: 900px;
+      margin: 4rem auto 0;
+      padding: 0 1.5rem;
+    }
+    .window {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+    }
+    .window-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .window-title {
+      flex: 1; text-align: center;
+      font-size: 0.78rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    }
+    .window-body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      min-height: 300px;
+    }
+    .window-chat {
+      border-right: 1px solid var(--border);
+      padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .msg {
+      padding: 0.65rem 0.9rem; border-radius: 8px;
+      font-size: 0.8rem; line-height: 1.5; max-width: 90%;
+    }
+    .msg-user {
+      background: rgba(79,142,247,0.15); color: #a8c4f8;
+      align-self: flex-end; border: 1px solid rgba(79,142,247,0.2);
+    }
+    .msg-ai {
+      background: rgba(255,255,255,0.04); color: var(--text);
+      align-self: flex-start; border: 1px solid var(--border);
+    }
+    .msg-typing { display: flex; gap: 4px; align-items: center; padding: 0.65rem 0.9rem; }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+      animation: typing 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+    .window-preview {
+      padding: 1.25rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-component {
+      background: white; border-radius: 10px; padding: 1.5rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+      width: 100%; max-width: 220px;
+    }
+    .preview-title { color: #111; font-size: 0.85rem; font-weight: 700; }
+    .preview-count { color: #111; font-size: 2rem; font-weight: 800; }
+    .preview-btns { display: flex; gap: 0.5rem; }
+    .preview-btn {
+      padding: 0.3rem 0.8rem; border-radius: 6px;
+      font-size: 0.7rem; font-weight: 600; border: none; cursor: default;
+    }
+    .pb-r { background: #ef4444; color: white; }
+    .pb-g { background: #10b981; color: white; }
+    .pb-gray { background: #6b7280; color: white; }
+
+    /* SECTION */
+    section { padding: 5rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent); margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+    .section-sub { color: var(--muted); max-width: 520px; font-size: 1rem; }
+
+    /* FEATURES GRID */
+    .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; margin-top: 3rem; }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .feature-card:hover { border-color: rgba(79,142,247,0.4); transform: translateY(-2px); }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 1rem;
+    }
+    .feature-card h3 { font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+    .feature-card p { color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
+
+    /* STACK */
+    .stack-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+    .stack-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 0.5rem 1rem; border-radius: 999px;
+      font-size: 0.82rem; font-weight: 500; color: var(--text);
+    }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* STEPS */
+    .steps { display: flex; flex-direction: column; gap: 0; margin-top: 2.5rem; }
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      position: relative; padding-bottom: 2rem;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step:not(:last-child)::before {
+      content: '';
+      position: absolute; left: 18px; top: 40px; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .step-num {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem; z-index: 1;
+    }
+    .step-content h3 { font-weight: 700; margin-bottom: 0.3rem; }
+    .step-content p { color: var(--muted); font-size: 0.9rem; }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(79,142,247,0.1); color: var(--accent);
+      padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.82em;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: var(--muted); font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .window-body { grid-template-columns: 1fr; }
+      .window-preview { display: none; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">UI<span>Gen</span>2</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#stack">Stack</a>
+      <a href="https://github.com/knand" target="_blank" rel="noopener" class="nav-cta">GitHub</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="badge"><span class="badge-dot"></span>Powered by Gemini 2.5 Flash</div>
+    <h1>Generate React components<br /><span class="gradient">with AI in seconds</span></h1>
+    <p class="hero-sub">
+      Describe any UI component in plain English. UIGen2 uses Google Gemini to write,
+      preview, and refine React + Tailwind code — live in your browser.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/knand" target="_blank" rel="noopener" class="btn-primary">View on GitHub</a>
+      <a href="#how-it-works" class="btn-secondary">How it works</a>
+    </div>
+
+    <!-- Demo window -->
+    <div class="demo-wrap">
+      <div class="window">
+        <div class="window-bar">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <div class="window-title">uigen2 — localhost:3001</div>
+        </div>
+        <div class="window-body">
+          <div class="window-chat">
+            <div class="msg msg-user">Create a counter component with increment and decrement buttons</div>
+            <div class="msg msg-ai">Sure! I'll build a Counter component with Tailwind CSS styling and clean state management.</div>
+            <div class="msg msg-ai" style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#a8c4f8;">
+              str_replace_editor → create /App.jsx<br/>
+              str_replace_editor → create /components/Counter.jsx
+            </div>
+            <div class="msg-typing">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+          <div class="window-preview">
+            <div class="preview-component">
+              <div class="preview-title">Counter</div>
+              <div class="preview-count">0</div>
+              <div class="preview-btns">
+                <div class="preview-btn pb-r">&#8722;</div>
+                <div class="preview-btn pb-gray">Reset</div>
+                <div class="preview-btn pb-g">&#43;</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to build UI fast</h2>
+    <p class="section-sub">No setup, no file system, no friction. Just describe what you want and watch it appear.</p>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(79,142,247,0.1);">⚡</div>
+        <h3>Live Preview</h3>
+        <p>Components render in a sandboxed iframe the moment Gemini generates the code. See changes as they stream in.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(124,58,237,0.1);">💬</div>
+        <h3>Chat-driven Iteration</h3>
+        <p>Refine your component through conversation. Ask for color changes, new props, animations — anything.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.1);">🗂️</div>
+        <h3>Virtual File System</h3>
+        <p>All files live in memory. Gemini creates and edits files using <code>str_replace_editor</code> just like a real IDE.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(6,182,212,0.1);">🎨</div>
+        <h3>Tailwind CSS v4</h3>
+        <p>Every component is styled with Tailwind. Full class support, responsive design, and dark mode out of the box.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(251,191,36,0.1);">📁</div>
+        <h3>Monaco Code Editor</h3>
+        <p>Browse and edit generated files in a full VS Code-powered editor with syntax highlighting.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.1);">🔐</div>
+        <h3>Auth + Project Saving</h3>
+        <p>Sign up to save your projects to a database. Anonymous users get localStorage persistence automatically.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" style="border-top: 1px solid var(--border);">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">From prompt to preview in 3 steps</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Describe your component</h3>
+          <p>Type a natural language prompt like <em>"a pricing card with a highlighted plan"</em> or <em>"an animated login form"</em>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Gemini writes the code</h3>
+          <p>Google Gemini 2.5 Flash streams JSX + Tailwind code, creating files in the virtual file system using AI tool calls (<code>str_replace_editor</code>).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Preview renders instantly</h3>
+          <p>Babel transforms the JSX on the client, builds an import map, and renders your component live in a sandboxed iframe — no build step needed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section id="stack" style="border-top: 1px solid var(--border);">
+    <div class="section-label">Tech Stack</div>
+    <h2 class="section-title">Built with modern tools</h2>
+    <p class="section-sub">Fully open-source stack with production-ready defaults.</p>
+    <div class="stack-row">
+      <div class="stack-pill"><div class="pill-dot" style="background:#000;border:1.5px solid #666;"></div> Next.js 15</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#61dafb;"></div> React 19</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#4f8ef7;"></div> Gemini 2.5 Flash</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#06b6d4;"></div> Tailwind CSS v4</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#3178c6;"></div> TypeScript</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#f97316;"></div> Vercel AI SDK</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#5865f2;"></div> Prisma + SQLite</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#e11d48;"></div> Monaco Editor</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#f59e0b;"></div> Babel Standalone</div>
+      <div class="stack-pill"><div class="pill-dot" style="background:#8b5cf6;"></div> shadcn/ui</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>UIGen2 &mdash; AI-powered React component generator &mdash; Built with Google Gemini 2.5 Flash</p>
+    <p style="margin-top:0.5rem;">
+      <a href="https://github.com/knand" target="_blank" rel="noopener">GitHub</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://aistudio.google.com" target="_blank" rel="noopener">Google AI Studio</a>
+    </p>
+  </footer>
+
+</body>
+</html>
