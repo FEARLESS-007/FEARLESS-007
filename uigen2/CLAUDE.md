@@ -62,7 +62,7 @@ UIGen2 is a Next.js 15 App Router app where users chat with Google Gemini AI to 
 
 ### Database
 
-Prisma with SQLite (`prisma/dev.db`). Two models:
+Prisma with PostgreSQL (Neon). Two models:
 - `User` — email/password (bcrypt), owns projects
 - `Project` — stores `messages` (JSON array) and `data` (serialized VFS JSON); `userId` is optional to allow anonymous projects
 
